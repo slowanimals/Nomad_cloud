@@ -12,3 +12,4 @@ venv
 dist
 build
 extras
+.DS_Store
