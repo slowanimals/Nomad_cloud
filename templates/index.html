@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+
+
+
+{% block body %}
+<!--js stuff-->
+    <script>
+    // Show the modal
+    function showUploadModal() {
+        document.getElementById('uploadModal').style.display = 'block';
+    }
+
+    // Close the modal
+    function closeUploadModal() {
+        document.getElementById('uploadModal').style.display = 'none';
+    }
+
+    // Toggle between existing/new folder inputs
+    function toggleNewFolder(select) {
+        const existingDiv = document.getElementById('existingFolder');
+        const newDiv = document.getElementById('newFolder');
+        
+        if (select.value === 'new') {
+            existingDiv.style.display = 'none';
+            newDiv.style.display = 'block';
+        } else {
+            existingDiv.style.display = 'block';
+            newDiv.style.display = 'none';
+        }
+    }
+
+    // Close modal if user clicks outside of it
+    document.addEventListener('click',function(event){
+        const modal = document.getElementById('uploadModal');
+        if (event.target == modal) {
+            closeUploadModal();
+        }
+    });
+
+    //show loading screen
+    function showLoading(){
+        document.getElementById('loadingOverlay').style.display='flex';
+        document.getElementById('mapframe').style.opacity=0.3;
+    }
+    window.onload = function(){
+        document.getElementById('loadingOverlay').style.display='none';
+        document.getElementById('mapframe').style.opacity=1;
+    }
+</script>
+
+    <div class="map">
+        <!--loading screen-->
+        <div id="loadingOverlay">
+            <img src="/static/assets/earthload.webp">
+        </div>
+
+        <iframe id='mapframe' src="/static/themap.html" height="100%" width="100%"></iframe>
+        
+    </div>
+
+    <div class="dash">
+        <div class="logo">
+            Nomad
+        </div>
+
+        <div class="buttons">
+            <form action="/generate" method="POST" onsubmit="showLoading()">
+                <button id="gen" type="submit">Generate</button>
+            </form>
+
+            <button id="up" onclick="showUploadModal()">Upload</button>
+            
+        </div>
+
+        <div class="folders">
+            {% for i in items %}
+            <div class="tripcard">
+                <p id="name">{{i}}</p>
+
+                <form action="/delete" method="POST" id="del">
+                    <input type="hidden" name="folder_name" value="{{i}}">
+                    <button id='delbut' type="submit">
+                        <p>Delete</p>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="distance">
+            <div class="milebar">
+                <div class="fill" style="width: {{norm}}%;"></div>
+            </div>
+            <p><b>{{miles}}</b> miles</p>
+            <p><b>{{covered}}%</b> of the Earth</p>
+        </div>
+
+        <div class="cache">
+            <form action="/delcache" method="POST" id="delcache">
+                <button id="cachebut" type="submit"> <p>Clear Cache</p> </button>
+            </form>
+        </div>
+
+    </div>
+
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUploadModal()">&times;</span>
+            <p><b>Upload Images</b></p>
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="files" multiple id="choose">
+                <input type="text" name="folder_name" placeholder="Folder Name" id="foldername">
+                <input type="submit" value="Upload!" id="modalup">
+            </form>
+        </div>
+    </div>
+
+   
+{% endblock%}

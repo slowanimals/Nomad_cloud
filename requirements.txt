@@ -1,0 +1,14 @@
+folium
+pathlib
+os
+random
+shutil
+pillow
+math
+exifread
+datetime
+flask 
+functools
+pyfladesk
+sys
+pickle
