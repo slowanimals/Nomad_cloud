@@ -1,11 +1,3 @@
-static/Trips/*
-!static/Trips/.gitkeep
-
-static/thumbs
-static/cache
-Reflex_Stuff
-tester.py
-sandbox.ipynb
 .vscode
 __pycache__
 venv

@@ -6,21 +6,14 @@ from pathlib import Path
 import shutil
 import math
 from functools import lru_cache
-from pyfladesk import init_gui
 import os
 import sys
+from paths import BASE_DIR, STATIC_DIR, TRIPS_DIR, CACHE_DIR, THUMBS_DIR
 
-def resource_path(relative_path): #from pyfladesk github
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+app = Flask(__name__)
 
-if getattr(sys, 'frozen', False):
-    template_folder = resource_path('templates')
-    static_folder = resource_path('static')
-    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else:
-    app = Flask(__name__)
-
+for d in [TRIPS_DIR, CACHE_DIR, THUMBS_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
 
 @lru_cache(maxsize=1)
 def dist_cache(folder_tuple):
@@ -32,14 +25,12 @@ def dist_cache(folder_tuple):
 
 @app.route('/')
 def index():
-    folder_path = Path('static') / 'Trips'
+    folder_path = TRIPS_DIR
     folders = [f.name.split('/')[-1] for f in folder_path.iterdir()]
-    folders.remove('.gitkeep')
     folders = sorted(folders,reverse=False)
 
     folder_tuple = tuple(folders)
     miles, covered, norm = dist_cache(folder_tuple)
-    os.makedirs('static/Trips',exist_ok=True)
 
     return render_template('index.html',items=folders, miles=miles, covered=covered, norm=norm)
 
@@ -53,18 +44,18 @@ def generate():
 def upload():
     files = request.files.getlist('files')
     folder_name = request.form['folder_name']
-    upload_path = f'static/Trips/{folder_name}'
+    upload_path = TRIPS_DIR / folder_name
     os.makedirs(upload_path, exist_ok=True)
 
     for file in files:
         if file.filename:
-            file.save(f'{upload_path}/{file.filename}')
+            file.save(upload_path/file.filename)
     return redirect('/')
 
 @app.route('/delete',methods=['POST'])
 def delete():
     folder_name = request.form['folder_name']
-    fpath = Path('static')/ 'Trips' / folder_name
+    fpath = TRIPS_DIR / folder_name
     if fpath.exists():
         try:
             shutil.rmtree(fpath)
@@ -75,7 +66,7 @@ def delete():
 
 @app.route('/delcache', methods=['POST'])
 def delcache():
-    fpath = Path('static')/'cache'
+    fpath = CACHE_DIR
     if fpath.exists():
         try:
             shutil.rmtree(fpath)
@@ -84,8 +75,6 @@ def delcache():
     return redirect('/')
 
 if __name__ == '__main__':
-   #app.run(port=8000, debug=True)
-   init_gui(app)
-
+   app.run(port=8000, debug=True)
 
 

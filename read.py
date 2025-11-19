@@ -2,6 +2,7 @@ import exifread
 import datetime
 from pathlib import Path
 from PIL import Image, ExifTags, ImageOps
+from paths import THUMBS_DIR   # absolute cloud-safe location
 
 #convert gps coords to decimal
 def convert_to_degrees(value):
@@ -13,9 +14,9 @@ def convert_to_degrees(value):
     return result
 
 #shrink images for thumbnail
-def make_thumbnail(img_path, out_folder = 'thumbs', size = (142,200)):
+def make_thumbnail(img_path, out_folder = THUMBS_DIR, size = (142,200)):
     out_dir = Path(out_folder)
-    out_dir.mkdir(exist_ok = True)
+    out_dir.mkdir(parents=True,exist_ok = True)
     img = Image.open(img_path)
 
     #ran into issue where vertical photos are flipped, here is a fix
@@ -76,7 +77,7 @@ def get_exif_data(path):
                 'location' : [lat,long],
                 'time' : str(gps_time),
                 'path' : f'{path}/{img.name}',
-                'thumb' : make_thumbnail(f'{path}/{img.name}', out_folder = 'static/thumbs', size = (100,100)),
+                'thumb' : make_thumbnail(f'{path}/{img.name}', size = (100,100)),
                 'orientation' : str(orient),
             }
 
@@ -87,30 +88,3 @@ def get_exif_data(path):
     )
 
     return sorted_data
-    
-
-#print(get_exif_data('images/'))
-
-#extract exif matadata
-def get_exif_data(path):
-    with open(path, 'rb') as file:
-        tags = exifread.process_file(file)
-    
-    gps_lat = tags.get('GPS GPSLatitude')
-    gps_lat_ref = tags.get('GPS GPSLatitudeRef')
-    gps_long = tags.get("GPS GPSLongitude")
-    gps_long_ref = tags.get("GPS GPSLongitudeRef")
-
-    if gps_lat and gps_lat_ref and gps_long and gps_long_ref:
-        lat = convert_to_degrees(gps_lat)
-        long = convert_to_degrees(gps_long)
-
-        if gps_lat_ref.values[0] != 'N':
-            lat = -lat
-        if gps_long_ref.values[0] != 'E':
-            long = -long
-    
-    return [long, lat]
-
-res = get_exif_data('testimg.jpg')
-print(res)

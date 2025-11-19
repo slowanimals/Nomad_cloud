@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 import random
 import shutil
+from paths import TRIPS_DIR, THUMBS_DIR, STATIC_DIR
 
 def run():
     base_map = folium.Map(location = (34.0556, -117.1825), 
@@ -15,32 +16,30 @@ def run():
                  max_bounds=True
                  )
 
-    if os.path.exists('static/thumbs'):
-        shutil.rmtree('static/thumbs')
-    os.mkdir('static/thumbs')
+    if THUMBS_DIR.exists():
+        shutil.rmtree(THUMBS_DIR)
+    THUMBS_DIR.mkdir(parents=True,exist_ok=True)
 
-    folder_path = Path('static') / 'Trips'
-    folders = [f.name.split('/')[-1] for f in folder_path.iterdir()]
+    folder_path = TRIPS_DIR
+    folders = [f.name.split('/')[-1] for f in folder_path.iterdir() if f.is_dir()]
     folders.remove('.gitkeep')
     colors = ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple', 'pink', 'black']
 
     print('starting...')
     for name in folders:
         print(name)
-        #try:
-        render.plot(base_map, f'static/Trips/{name}', colors[random.randint(0, len(colors)-1)])
-        #except UserWarning:
-            #render.plot(base_map,f'assets/Trips/{name}','purple')
+        trip_path = TRIPS_DIR / name
+        render.plot(base_map, str(trip_path), colors[random.randint(0, len(colors)-1)])
+    
     print('done!')
-    base_map.save('static/themap.html')
+    base_map.save(str(STATIC_DIR / 'themap.html'))
 
 def dist():
     dist = 0.0
-    folder_path = Path('static') / 'Trips'
-    folders = [f.name.split('/')[-1] for f in folder_path.iterdir()]
-    folders.remove('.gitkeep')
+    folder_path = TRIPS_DIR
+    folders = [f.name.split('/')[-1] for f in folder_path.iterdir() if f.is_dir()]
     for f in folders:
-        dist += render.getDist(f'static/Trips/{f}', dist)
+        dist += render.getDist(str(TRIPS_DIR/f), dist)
     
     return dist
 
