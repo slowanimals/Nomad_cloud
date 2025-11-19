@@ -76,8 +76,8 @@ def get_exif_data(path):
             data[img.name] = {
                 'location' : [lat,long],
                 'time' : str(gps_time),
-                'path' : f'{path}/{img.name}',
-                'thumb' : make_thumbnail(f'{path}/{img.name}', size = (100,100)),
+                'path' : str(img),
+                'thumb' : make_thumbnail(img, size = (100,100)),
                 'orientation' : str(orient),
             }
 

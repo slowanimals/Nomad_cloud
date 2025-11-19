@@ -22,14 +22,13 @@ def run():
 
     folder_path = TRIPS_DIR
     folders = [f.name.split('/')[-1] for f in folder_path.iterdir() if f.is_dir()]
-    folders.remove('.gitkeep')
     colors = ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple', 'pink', 'black']
 
     print('starting...')
     for name in folders:
         print(name)
         trip_path = TRIPS_DIR / name
-        render.plot(base_map, str(trip_path), colors[random.randint(0, len(colors)-1)])
+        render.plot(base_map, str(trip_path), random.choice(colors))
     
     print('done!')
     base_map.save(str(STATIC_DIR / 'themap.html'))
